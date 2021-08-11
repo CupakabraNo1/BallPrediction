@@ -1,0 +1,5 @@
+venv
+localdata
+.idea
+wandb
+yolov5
