@@ -1,37 +1,46 @@
-# imports
 import cv2
+import csv
+import torch
+import os
 
 from argparse import ArgumentParser
-from PIL import Image
+from constants import DEFAULT_HEADER, VALUES_PATH
 
-
-def detect_ball(image):
-    return ''
-
+# model = torch.load("workspace/model/best.pt")
 
 def get_ball_coordinates(frame):
-    image = Image.fromarray(frame)
 
-    detection = detect_ball(image)
+    # calculations for center of the object detected on frame
 
-    return 1, 1
+    x, y = 1, 1
+
+    return x, y
 
 
 def video_ball_detection(path_to_file):
     video = cv2.VideoCapture(path_to_file)
-    frame_number = 0
+    frame_number = 1
 
-    success = True
-    while success:
+    value_matrix = []
+
+    while True:
         success, frame = video.read()
-        x, y = get_ball_coordinates(frame)
+        if not success:
+            break
 
+        x, y = get_ball_coordinates(frame)
         if not x or not y:
             frame_number += 1
             continue
-        print("{}, {}, {}".format(frame_number, x, y))
+
+        value_matrix.append([frame_number, x, y])
+
+        # cv2.imwrite("data/frame-{}.jpg".format(frame_number), frame)
+
         frame_number += 1
+
     video.release()
+    return value_matrix
 
 
 if __name__ == "__main__":
@@ -40,10 +49,22 @@ if __name__ == "__main__":
     argument_parser.add_argument("visualize", type=bool, help="Enable visualization")
     arguments = argument_parser.parse_args()
 
-    print(arguments)
     video_file = arguments.video
     visualization = arguments.visualize
 
-    video_ball_detection(video_file)
+    print("Starting recognition process...")
+
+    matrix = video_ball_detection(video_file)
+
+    with open(VALUES_PATH, "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(DEFAULT_HEADER)
+        writer.writerows(matrix)
+    print("Recognition process ended.")
+
+    if visualization:
+        print("Starting visualization...")
+        visualization_command = "python workspace\show_ball_dataset.py {} {}".format(video_file, VALUES_PATH)
+        os.system(visualization_command)
 
     cv2.destroyAllWindows()

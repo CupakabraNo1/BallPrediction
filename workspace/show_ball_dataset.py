@@ -48,6 +48,9 @@ if __name__ == "__main__":
 
         # Drawing points
         pt1, pt2 = tuple(ball_pos - 5), tuple(ball_pos + 5)
+        print("Frame {} : {} {}".format(frame_no, pt1, pt2))
+
+        # cv2.imwrite("data/ball/frame-{}.jpg".format(frame_no), frame)
 
         # Draw green rectangle on frame
         cv2.rectangle(frame, pt1, pt2, (0, 255, 0), thickness=2)
